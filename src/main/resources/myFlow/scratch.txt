@@ -1,0 +1,6 @@
+<T>reader(songStuff)
+<T>process(X_WSCL)
+<T>writer(G)
+                     |_____LOAD_ZONE (G) // multi planner
+
+
