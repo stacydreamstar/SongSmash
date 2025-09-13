@@ -2,8 +2,7 @@ package songsmash.central.services.SongStuffService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-import songsmash.central.Factories.SongStuffJobFactory.SongStuffJobFactory;
+import songsmash.central.factories.SongStuffJobFactory.SongStuffJobFactory;
 
 
 import java.util.List;
