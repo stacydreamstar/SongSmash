@@ -1,15 +1,17 @@
 package songsmash.central.Factories.SongStuffJobFactory;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.JobExecution;
@@ -40,6 +42,16 @@ import java.util.UUID;
 @EnableBatchProcessing
 public class SongStuffJobFactory{
 
+    private JobRepository jobRepository;
+
+   // private ItemReader<String> songLinkItemReader;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    @Autowired
     Job_MultiPlaylist buildMultiPlaylistX = new Job_MultiPlaylist();
 
     @Autowired
@@ -49,37 +61,58 @@ public class SongStuffJobFactory{
         this.userOption = option;
     }
 
-    public List<String> determinerTree(String input, Long trackingId, @Qualifier("file") String filePath){
+    public List<String> determinerTree(String option, Long trackingId, String tempFilePath){
 
-        switch(input){
+        switch(option){
             case "MULTI_PLAYLIST" -> {
-                System.out.println("starting job: " + input);
+                System.out.println("starting job: " + option);
 
                 try {
+
+                    File file = new File(tempFilePath);
+
+                    if (!file.exists()) {
+                        throw new IllegalArgumentException("File not found at path: " + tempFilePath);
+                    }
+
+                    if (!file.getName().endsWith(".txt")) {
+                        throw new IllegalArgumentException("Invalid file type. Only .txt files are supported.");
+                    }
+
+
+
+
+
+
                     JobParameters jobParameters = new JobParametersBuilder()
-                            .addString("filePath", filePath)
-                            .addString("selectedOption", input)
+                            .addString("selectedOption", option)
                             .addLong("trackingId", trackingId)
+                            .addString("filePath", tempFilePath) // Add file path here
                             .toJobParameters();
-                    JobExecution jobExecution = jobLauncher.run(buildMultiPlaylistT(), jobParameters);
+
+                    Job buildMultiPlaylistJob = applicationContext.getBean("buildMultiPlaylistX", Job.class);
+                    JobExecution jobExecution = jobLauncher.run(buildMultiPlaylistJob, jobParameters);
                     System.out.println("Job Status: " + jobExecution.getStatus());
+
+                    System.out.println("Job Status: " + jobExecution.getStatus());
+                    return null;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 return null;
             }
             case "SUMN_ELSE" -> {
-                System.out.println("output is a List. Elements: " + input);
+                System.out.println("output is a List. Elements: " + option);
                 return null;
             }
             case "SUMN_ELSEX" -> {
-                System.out.println("output is a File: " + (input));
+                System.out.println("output is a File: " + (option));
                 return null;
             }
-            default -> System.out.println("Input is of type: " + input.getClass().getName());
-            return null;
+            default -> System.out.println("Input is of type: " + option.getClass().getName());
 
         }
+        return null;
 
     }
 
@@ -87,19 +120,18 @@ public class SongStuffJobFactory{
 
 
     @Bean("textFileUploadedJob")
-    public List<String> textFileUploadedJob(String filePath, String selectedOption) {
+    public List<String> textFileUploadedJob(String tempFilePath, String selectedOption) {
         Long trackingId= Math.abs(UUID.randomUUID().getMostSignificantBits());
-        determinerTree(selectedOption, trackingId, filePath);
+        determinerTree(selectedOption, trackingId, tempFilePath);
 
 
         return null;
     }
 
-    @Bean("buildMultiPlaylistT")
-    public Job buildMultiPlaylistT() {
-        return new JobBuilder("exampleJob")
-                .start(buildMultiPlaylistX.parseInputStep())
-                .next()
+    @Bean("buildMultiPlaylistX")
+    public Job buildMultiPlaylistX(JobParameters jobParameters) {
+        return new JobBuilder("buildMultiPlaylistX_Run", jobRepository)
+                .start(buildMultiPlaylistX.parseInputStep( jobRepository, transactionManager))
                 .build();
     }
 

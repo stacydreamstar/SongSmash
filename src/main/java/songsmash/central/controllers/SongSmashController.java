@@ -9,6 +9,7 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.ResponseEntity;
 import songsmash.central.services.SongStuffService.SongStuffService;
 
+import java.io.File;
 import java.util.List;
 
 @RestController
@@ -33,7 +34,9 @@ public class SongSmashController {
         String doOption = option.getUserOption();;
 
         try {
-            String tempFilePath = "/tmp/" + file.getOriginalFilename();
+            String tempFilePath = saveToTempLocation(file);
+
+
             //taskExecutor.execute(new songStuffServiceFileUploaded.textFileUploaded(file));
             taskExecutor.execute(new StartDaProcessMPF(tempFilePath, doOption));
             return ResponseEntity.ok(dummyListResponse);
@@ -45,6 +48,19 @@ public class SongSmashController {
 
     }
 
+    public String saveToTempLocation(MultipartFile file) throws Exception {
+        // Define the temporary directory and file path
+        String tempDir = System.getProperty("java.io.tmpdir");
+        String tempFilePath = tempDir + File.separator + file.getOriginalFilename();
+
+        // Save the file to the temporary location
+        File tempFile = new File(tempFilePath);
+        file.transferTo(tempFile);
+
+        // Return the path of the saved file
+        return tempFilePath;
+    }
+
 
 
 
@@ -54,12 +70,15 @@ public class SongSmashController {
         private MultipartFile file;
         private String option;
 
+        private String tempFilePath;
 
 
 
-        public StartDaProcessMPF(MultipartFile file, String option) {
-            this.file = file;
+
+        public StartDaProcessMPF(String tempFilePath, String option) {
+            //this.file = file;
             this.option = option;
+            this.tempFilePath = tempFilePath;
         }
 
 
@@ -68,7 +87,7 @@ public class SongSmashController {
             // Process the file here
             System.out.println("Processing file: " + file.getOriginalFilename());
             // Add your file processing logic here
-            songStuffServiceFileUploaded.textFileUploaded(file, option);
+            songStuffServiceFileUploaded.textFileUploaded(tempFilePath, option);
         }
     }
 

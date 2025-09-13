@@ -45,12 +45,12 @@ public class SongStuffService<T> {
 
 
 @Bean("textFileUploaded")
-    public List<String> textFileUploaded(String filePath, String option) {
+    public List<String> textFileUploaded(String tempFilePath, String option) {
 
 
 
         Long trackingId= Math.abs(UUID.randomUUID().getMostSignificantBits());
-        return  songStuffJobFactory.textFileUploadedJob(filePath, option);
+        return  songStuffJobFactory.textFileUploadedJob(tempFilePath, option);
 
 
 
