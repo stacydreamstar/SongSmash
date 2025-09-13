@@ -1,5 +1,7 @@
 package songsmash.central.Factories.SongStuffJobFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,6 +40,8 @@ import java.util.UUID;
 @EnableBatchProcessing
 public class SongStuffJobFactory{
 
+    Job_MultiPlaylist buildMultiPlaylistX = new Job_MultiPlaylist();
+
     @Autowired
     JobLauncher jobLauncher;
     String userOption;
@@ -45,7 +49,7 @@ public class SongStuffJobFactory{
         this.userOption = option;
     }
 
-    public List<String> determinerTree(String input, Long trackingId, MultipartFile file){
+    public List<String> determinerTree(String input, Long trackingId, @Qualifier("file") String filePath){
 
         switch(input){
             case "MULTI_PLAYLIST" -> {
@@ -53,11 +57,11 @@ public class SongStuffJobFactory{
 
                 try {
                     JobParameters jobParameters = new JobParametersBuilder()
-                            .addString("fileName", file.getOriginalFilename())
+                            .addString("filePath", filePath)
                             .addString("selectedOption", input)
                             .addLong("trackingId", trackingId)
                             .toJobParameters();
-                    JobExecution jobExecution = jobLauncher.run(exampleJob(), jobParameters);
+                    JobExecution jobExecution = jobLauncher.run(buildMultiPlaylistT(), jobParameters);
                     System.out.println("Job Status: " + jobExecution.getStatus());
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -83,26 +87,32 @@ public class SongStuffJobFactory{
 
 
     @Bean("textFileUploadedJob")
-    public List<String> textFileUploadedJob(MultipartFile file, String selectedOption) {
+    public List<String> textFileUploadedJob(String filePath, String selectedOption) {
         Long trackingId= Math.abs(UUID.randomUUID().getMostSignificantBits());
-        determinerTree(selectedOption, trackingId, file);
+        determinerTree(selectedOption, trackingId, filePath);
 
-
-        try {
-            JobParameters jobParameters = new JobParametersBuilder()
-                    .addString("fileName", file.getOriginalFilename())
-                    .addString("selectedOption", selectedOption)
-                    .addLong("trackingId", trackingId)
-                    .toJobParameters();
-
-            JobExecution jobExecution = jobLauncher.run(exampleJob(), jobParameters);
-            System.out.println("Job Status: " + jobExecution.getStatus());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         return null;
     }
+
+    @Bean("buildMultiPlaylistT")
+    public Job buildMultiPlaylistT() {
+        return new JobBuilder("exampleJob")
+                .start(buildMultiPlaylistX.parseInputStep())
+                .next()
+                .build();
+    }
+
+//    @Bean
+//    public Step exampleStep() {
+//        return new StepBuilder("exampleStep")
+//                .<String, String>chunk(10)
+//                .reader(exampleReader())
+//                .processor(exampleProcessor())
+//                .writer(exampleWriter())
+//                .build();
+//    }
+
 
 
 

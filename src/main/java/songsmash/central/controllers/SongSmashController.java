@@ -33,8 +33,9 @@ public class SongSmashController {
         String doOption = option.getUserOption();;
 
         try {
+            String tempFilePath = "/tmp/" + file.getOriginalFilename();
             //taskExecutor.execute(new songStuffServiceFileUploaded.textFileUploaded(file));
-            taskExecutor.execute(new StartDaProcessMPF(file, doOption));
+            taskExecutor.execute(new StartDaProcessMPF(tempFilePath, doOption));
             return ResponseEntity.ok(dummyListResponse);
 
 

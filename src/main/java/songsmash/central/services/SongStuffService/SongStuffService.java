@@ -44,13 +44,13 @@ public class SongStuffService<T> {
 
 
 
-@Bean("textFileUploadedService")
-    public List<String> textFileUploaded(MultipartFile file, String option) {
+@Bean("textFileUploaded")
+    public List<String> textFileUploaded(String filePath, String option) {
 
 
 
         Long trackingId= Math.abs(UUID.randomUUID().getMostSignificantBits());
-        return  songStuffJobFactory.textFileUploadedJob(file, option);
+        return  songStuffJobFactory.textFileUploadedJob(filePath, option);
 
 
 
