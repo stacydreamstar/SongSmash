@@ -3,7 +3,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
+import songsmash.central.Factories.SongStuffJobFactory.SongStuffJobFactory;
 
 
 import java.util.List;
@@ -13,7 +13,8 @@ import java.util.UUID;
 public class SongStuffService<T> {
 
     @Autowired
-    String inputType;
+    SongStuffJobFactory songStuffJobFactory= new SongStuffJobFactory();
+
 
 
 
@@ -43,13 +44,17 @@ public class SongStuffService<T> {
 
 
 
-@Bean("textFileUploaded")
-    public List<String> textFileUploaded(MultipartFile file) {
+@Bean("textFileUploadedService")
+    public List<String> textFileUploaded(MultipartFile file, String option) {
+
+
+
         Long trackingId= Math.abs(UUID.randomUUID().getMostSignificantBits());
+        return  songStuffJobFactory.textFileUploadedJob(file, option);
 
-        return null;
+
+
     }
-
 
 
 }

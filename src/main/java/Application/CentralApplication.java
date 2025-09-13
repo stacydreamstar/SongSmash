@@ -1,4 +1,4 @@
-package songsmash.central.services;
+package Application;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

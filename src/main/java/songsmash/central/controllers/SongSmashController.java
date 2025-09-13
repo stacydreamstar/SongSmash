@@ -1,4 +1,5 @@
 package songsmash.central.controllers;
+import Vo.Option;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import songsmash.central.services.*;
@@ -25,13 +26,15 @@ public class SongSmashController {
     List<String> dummyListResponse;
 
 
-
+//when u get a txt file what do w it
     @PostMapping("/songstuff/txt_file")
-    public ResponseEntity<List<String>> handleSongStuffPostRequest(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<List<String>> handleSongStuffPostRequest(@RequestParam("file") MultipartFile file, @RequestBody Option option) {
+
+        String doOption = option.getUserOption();;
 
         try {
             //taskExecutor.execute(new songStuffServiceFileUploaded.textFileUploaded(file));
-            taskExecutor.execute(new StartDaProcess(file));
+            taskExecutor.execute(new StartDaProcessMPF(file, doOption));
             return ResponseEntity.ok(dummyListResponse);
 
 
@@ -44,26 +47,27 @@ public class SongSmashController {
 
 
 
-    private class StartDaProcess implements Runnable {
-
+    private class StartDaProcessMPF implements Runnable {
 
 
         private MultipartFile file;
-        public StartDaProcess(MultipartFile file) {
+        private String option;
+
+
+
+
+        public StartDaProcessMPF(MultipartFile file, String option) {
             this.file = file;
+            this.option = option;
         }
 
-        private String otherX;
-        public StartDaProcess(String string) {
-            this.otherX = otherX;
-        }
 
         @Override
         public void run() {
             // Process the file here
             System.out.println("Processing file: " + file.getOriginalFilename());
             // Add your file processing logic here
-            songStuffServiceFileUploaded.textFileUploaded(file);
+            songStuffServiceFileUploaded.textFileUploaded(file, option);
         }
     }
 
